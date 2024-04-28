@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User
 from django.http import JsonResponse,HttpResponse
+import joblib
 from elderly.models import api_keys,doctor,hospitals
 from django.contrib.auth import authenticate,login
 from django.contrib.auth import logout as logouts
@@ -8,6 +9,8 @@ from elderly.models import RegUser,doctor,patients,prescription,ambulance_book,R
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
 from django.core.mail import send_mail
+
+loaded_model=joblib.load("./savemodels/model_saved.joblib")
 # Create your views here.
 def index(request):
     
@@ -87,6 +90,30 @@ def ambulance_api(request,val):
         return JsonResponse(list(ambu_data.values()),safe=False)
     return HttpResponse("Invalid API Key")
 def prompt(request):
+    if(request.method=="POST"):
+        age=request.POST.get("age")
+        gender=request.POST.get("gender")
+        level=request.POST.get("level")
+        prompt1=request.POST.get("prompt1")
+        prompt2=request.POST.get("prompt2")
+        prompt3=request.POST.get("prompt3")
+        genderDict={
+            "male":1,
+            "female":0
+        }
+        promptDict={
+               "happy":2,
+               "anxious":0,
+               "lonely":4,
+               "pain":5,
+               "free mind":1,
+               "joyful":3
+        }
+     
+   
+        res=loaded_model.predict([[57,3,4,0,4,3]])
+        print(res[0])
+
     return render(request,"prompt.html")
 @csrf_protect
 def Login(request):
